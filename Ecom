@@ -1,0 +1,127 @@
+CREATE DATABASE Ecommerce
+go
+
+USE Ecommerce
+go
+
+--1) Customer Table
+CREATE TABLE customers (
+    customer_id INT IDENTITY(1,1),
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+ALTER TABLE customers
+ADD CONSTRAINT PK_customer_id PRIMARY KEY (customer_id);
+
+INSERT INTO customers (name, email, password) VALUES
+('Arun Kumar', 'arun@example.com', 'hashedpassword1'),
+('Malar Devi', 'malar@example.com', 'hashedpassword2'),
+('Krishnan Raja', 'krishna@example.com', 'hashedpassword3'),
+('Sankari Nanda', 'sankari@example.com', 'hashedpassword4'),
+('Murugesan', 'murugan@example.com', 'hashedpassword5');
+
+SELECT * FROM customers;
+
+
+--2)Products table
+CREATE TABLE products (
+    product_id INT IDENTITY(1,1),
+    name VARCHAR(255) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    description TEXT,
+    stock_quantity INT NOT NULL CHECK (stock_quantity >= 0)
+);
+
+ALTER TABLE products
+ADD CONSTRAINT PK_product_id PRIMARY KEY (product_id)
+
+INSERT INTO products (name, price, description, stock_quantity) VALUES
+('Laptop', 1200.00, 'High-performance laptop', 10),
+('Smartphone', 800.00, 'Latest model smartphone', 15),
+('Headphones', 150.00, 'Noise-canceling headphones', 20),
+('Smartwatch', 250.00, 'Feature-packed smartwatch', 12),
+('Tablet', 500.00, '10-inch tablet with great performance', 8);
+
+SELECT * FROM products;
+
+
+--3)Cart table
+CREATE TABLE cart (
+    cart_id  INT IDENTITY(1,1),
+    customer_id INT,
+    product_id INT,
+    quantity INT NOT NULL CHECK (quantity > 0)
+);
+
+ALTER TABLE cart
+ADD CONSTRAINT PK_cart_id PRIMARY KEY (cart_id)
+
+INSERT INTO cart (customer_id, product_id, quantity) VALUES
+(1, 2, 1),
+(2, 3, 2),
+(3, 1, 1),
+(4, 5, 1),
+(5, 4, 3);
+
+ALTER TABLE cart 
+ADD CONSTRAINT fk_cart_customer FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE;
+
+ALTER TABLE cart 
+ADD CONSTRAINT fk_cart_product FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+
+SELECT * FROM cart;
+
+
+--4)Orders Table
+CREATE TABLE orders (
+    order_id  INT IDENTITY(1,1),
+    customer_id INT,
+    order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    total_price DECIMAL(10,2) NOT NULL,
+    shipping_address TEXT NOT NULL
+);
+
+ALTER TABLE orders
+ADD CONSTRAINT PK_order_id PRIMARY KEY (order_id)
+
+INSERT INTO orders (customer_id, total_price, shipping_address) VALUES
+(1, 800.00, '12, Anna Nagar, Chennai'),
+(2, 300.00, '45, Gandhi Street, Coimbatore'),
+(3, 1200.00, '78, Rajaji Road, Madurai'),
+(4, 500.00, '23, Kamaraj Nagar, Trichy'),
+(5, 750.00, '56, Periyar Salai, Salem');
+
+ALTER TABLE orders 
+ADD CONSTRAINT fk_orders_customer FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE;
+
+SELECT * FROM orders;
+
+
+
+--5) order_items Table
+CREATE TABLE order_items (
+    order_item_id INT IDENTITY(1,1),
+    order_id INT,
+    product_id INT,
+    quantity INT NOT NULL CHECK (quantity > 0)
+);
+
+ALTER TABLE order_items
+ADD CONSTRAINT PK_order_item_id PRIMARY KEY (order_item_id)
+
+INSERT INTO order_items (order_id, product_id, quantity) VALUES
+(1, 2, 1),
+(2, 3, 2),
+(3, 1, 1),
+(4, 5, 1),
+(5, 4, 3);
+
+ALTER TABLE order_items 
+ADD CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE;
+
+ALTER TABLE order_items 
+ADD CONSTRAINT fk_order_items_product FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE;
+
+SELECT * FROM order_items;
